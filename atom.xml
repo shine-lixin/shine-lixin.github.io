@@ -2,10 +2,17 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Shine的技术生涯]]></title>
+<<<<<<< HEAD
   <link href="http://shine-lixin.github.io/atom.xml" rel="self"/>
   <link href="http://shine-lixin.github.io/"/>
   <updated>2015-04-20T19:12:28+08:00</updated>
   <id>http://shine-lixin.github.io/</id>
+=======
+  <link href="http://yoursite.com/atom.xml" rel="self"/>
+  <link href="http://yoursite.com/"/>
+  <updated>2015-04-20T18:03:28+08:00</updated>
+  <id>http://yoursite.com/</id>
+>>>>>>> 07d804cf23dfe8ea9851c6ab73c254b620f1e674
   <author>
     <name><![CDATA[shine li]]></name>
     
@@ -14,6 +21,7 @@
 
   
   <entry>
+<<<<<<< HEAD
     <title type="html"><![CDATA[Test 2]]></title>
     <link href="http://shine-lixin.github.io/blog/2015/04/20/test-2/"/>
     <updated>2015-04-20T19:12:14+08:00</updated>
@@ -27,6 +35,12 @@
     <link href="http://shine-lixin.github.io/blog/2015/04/20/test-blog/"/>
     <updated>2015-04-20T17:05:02+08:00</updated>
     <id>http://shine-lixin.github.io/blog/2015/04/20/test-blog</id>
+=======
+    <title type="html"><![CDATA[Test Blog]]></title>
+    <link href="http://yoursite.com/blog/2015/04/20/test-blog/"/>
+    <updated>2015-04-20T17:05:02+08:00</updated>
+    <id>http://yoursite.com/blog/2015/04/20/test-blog</id>
+>>>>>>> 07d804cf23dfe8ea9851c6ab73c254b620f1e674
     <content type="html"><![CDATA[
 ]]></content>
   </entry>

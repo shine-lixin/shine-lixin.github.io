@@ -1,4 +1,8 @@
 User-agent: *
 Disallow: 
 
+<<<<<<< HEAD
 Sitemap: http://shine-lixin.github.io/sitemap.xml 
+=======
+Sitemap: http://yoursite.com/sitemap.xml 
+>>>>>>> 07d804cf23dfe8ea9851c6ab73c254b620f1e674

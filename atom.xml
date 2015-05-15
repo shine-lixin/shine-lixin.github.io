@@ -7,7 +7,7 @@
   <subtitle>Anything worth to record down especially for tech</subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="/" rel="alternate" type="text/html"/>
-  <updated>2015-04-30T16:58:35+08:00</updated>
+  <updated>2015-05-15T15:15:38+08:00</updated>
   <id>/</id>
   <author>
     <name>shine(李鑫)</name>
@@ -17,10 +17,10 @@
 
   
   <entry>
-    <title>Welcome to Jekyll!</title>
-    <link href="/jekyll/update/welcome-to-jekyll/"/>
-    <updated>2015-04-30T04:42:23+08:00</updated>
-    <id>/jekyll/update/welcome-to-jekyll</id>
+    <title>协程(Coroutine)不一样的多线程编程模型</title>
+    <link href="/arch/corotinue/"/>
+    <updated>2015-05-11T17:25:20+08:00</updated>
+    <id>/arch/corotinue</id>
     <author>
       <name>shine(李鑫)</name>
       <uri>/</uri>
@@ -28,19 +28,107 @@
     </author>
     <content type="html">
       
-      &lt;p&gt;You’ll find this post in your &lt;code&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+      &lt;p&gt;近些年越来越多的人关注协程（Coroutine）的概念，并且越来越多的语言也在语言层面实现了对协程的支持，如PHP、ruby以及Python等。&lt;/p&gt;
 
-&lt;p&gt;To add new posts, simply add a file in the &lt;code&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+&lt;p&gt;那么，协程用来解决什么问题 以及 有什么样的优势呢？&lt;/p&gt;
 
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+&lt;p&gt;本文接下来将从以下几个方面来进行说明：&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;Tom&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &amp;#39;Hi, Tom&amp;#39; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;背景&lt;/li&gt;
+  &lt;li&gt;什么是协程？&lt;/li&gt;
+  &lt;li&gt;协程的用途&lt;/li&gt;
+  &lt;li&gt;结论&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://github.com/jekyll/jekyll-help&quot;&gt;Jekyll’s dedicated Help repository&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&quot;section&quot;&gt;一. 背景&lt;/h3&gt;
+&lt;p&gt;并发是世界的本质，而计算机中实现并发的技术手段便是&lt;strong&gt;多任务机制&lt;/strong&gt;。对于多任务机制来说，大体可以分为两种：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;抢占式任务(Preemptive Multitasking)：由操作系统决定何时执行哪个任务&lt;/li&gt;
+  &lt;li&gt;协作式式任务(Nonpreemptive Multitasking)：决定权交给任务本身，即由程序本身决定什么时候放弃执行。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;针对上面两种机制来说，他们的优缺点分别是：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;抢占式任务
+– 优点：调度由操作系统决定，程序员无需知晓底层实现。
+– 缺点：存在&lt;strong&gt;同步问题&lt;/strong&gt;，会使得程序经常有不可预知的行为；&lt;/li&gt;
+  &lt;li&gt;协作式任务
+– 优点：调度由程序本身决定；因此，在实现异步编程时，有着天生的优势。
+– 缺点：需要实现调度；同时，单个Routine的可能会导致整个程序的失败。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;其中，协程就是一种实现“协作式多任务”的编程模型。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;二. 什么是协程&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;协程(Coroutine)&lt;/strong&gt;就是实现“协作式任务（Nonpreemptive Multitasking）”的一种编程模型，早在1958年就由Melvin Conway在提出。因此，有人说：
+&amp;gt; 协程可以看作是一种&lt;strong&gt;用户态线程&lt;/strong&gt;，需要主动让出CPU时间，而不依赖于系统调度。&lt;/p&gt;
+
+&lt;p&gt;另外，传统的函数调用和协程是什么关系呢？
+&amp;gt; “Subroutines are special cases of … coroutines.” —— Donald Knuth&lt;/p&gt;
+
+&lt;p&gt;如上面所说，knuth大神认为“传统的函数调用是协程的一种特例”。这个如果我们这样想：可以把函数的return看作是一种“CPU时间占用的放弃”；那么本身这种就是一种任务调度，只是其调度不可逆，即如下代码所示：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    
+&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt; 
+    &lt;span class=&quot;nx&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; 
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){}&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;A调用了B，即B在执行完成后，就主动把控制权交还给了A。
+从这个角度来理解的话，的确“函数是协程的一个特例”。&lt;/p&gt;
+
+&lt;p&gt;这样理解貌似不是很清楚，我们从一个生产者/消费者模型来看下面的例子：&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;queue&lt;/span&gt;
+    
+    &lt;span class=&quot;c1&quot;&gt;//生产者&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;coroutine&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;produce&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;loop&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;full&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;create&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;some&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;items&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;add&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;q&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;consume&lt;/span&gt;
+        
+    &lt;span class=&quot;c1&quot;&gt;//消费者&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;coroutine&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;consume&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;loop&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;empty&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;remove&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;some&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;q&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;items&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;produce&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;&lt;span class=&quot;x&quot;&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;在传统的生产者/消费者模型是一个线程写消息，一个线程取消息，通过锁机制控制队列和等待，但一不小心就可能死锁。
+而协程则通过&lt;strong&gt;yield&lt;/strong&gt;实现的CPU控制权的转移；同时，由于切换是在同一个线程内，切换成本极低，同时不存在同步以及锁的问题。&lt;/p&gt;
+
+&lt;p&gt;在程序管理方面，协程的优势还在于实现异步代码，即实现后的代码会更像同步代码，极大的增大了代码的可读性。&lt;/p&gt;
+
+&lt;p&gt;[注]：具体的代码，在研究过PHP本身协程实现后，在来具体说明。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;三. 协程的用途&lt;/h3&gt;
+&lt;p&gt;根据&lt;a href=&quot;http://en.wikipedia.org/wiki/Coroutine&quot;&gt;维基百科&lt;/a&gt;的说明，协程在实现以下方面时，具有先天优势：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/State_machine&quot;&gt;State machines&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Actor_model&quot;&gt;Actor model&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Generator_(computer_programming)&quot;&gt;Generators&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;具体的大家可以查看相应的wiki链接了解其概念。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-3&quot;&gt;四. 结论&lt;/h3&gt;
+&lt;p&gt;协程仍然有些具体概念以及实现机制需要自己去研究；不过，对于正在执行大量异步操作的任务来说，代码看起来是完全同步的，这也许才是其越来越受到重视的原因。&lt;/p&gt;
+
+&lt;p&gt;无论如何，协程都应该尽量想明白点~&lt;/p&gt;
 
 
     </content>
